@@ -1,0 +1,10 @@
+.button {
+  padding: 10px 20px;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  &.primary {
+      background-color: #557571;
+      color: whitesmoke;
+  }
+}

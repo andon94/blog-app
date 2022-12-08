@@ -1,0 +1,26 @@
+.pagination {
+  ul {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    justify-content: center;
+
+    li {
+      padding: 5px;
+      margin: 5px;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      &.selected {
+        color: red;
+        font-weight: bold;
+      }
+
+      &.hide {
+        display: none;
+      }
+    }
+  }
+}
