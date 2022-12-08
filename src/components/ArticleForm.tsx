@@ -1,6 +1,8 @@
 import styles from "./ArticleForm.module.scss";
 import BaseButton from "./BaseButton";
-import { useContext, useState } from "react";
+import { useContext } from "react";
+import { useForm } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 import { CategoryContext } from "../context/CategoryContextProvider";
 import { articlesApi } from "../services/articles";
 import { AuthContext } from "../context/AuthContextProvider";
@@ -10,8 +12,8 @@ import { ErrorInterface } from "../interfaces/base";
 import { PopupContext } from "../context/PopupContextProvider";
 
 const ArticleForm = ({
-  title = "",
-  body = "",
+  title,
+  body,
   category_id = 0,
   id,
   type,
@@ -30,16 +32,35 @@ const ArticleForm = ({
   const { setPopup } = useContext(PopupContext);
   const categories = categoryData.data?.data || [];
 
-  const [name, setTitle] = useState(title);
-  const [content, setContent] = useState(body);
-  const [categoryId, setCategoryId] = useState(category_id);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{
+    title: string;
+    content: string;
+    categoryId: number;
+  }>({
+    defaultValues: {
+      title,
+      content: body,
+      categoryId: category_id,
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = ({
+    title,
+    content,
+    categoryId,
+  }: {
+    title: string;
+    content: string;
+    categoryId: number;
+  }) => {
     if (type === "create") {
       articlesApi
         .createArticle({
-          title: name,
+          title,
           body: content,
           category_id: Number(categoryId),
           api_token: token,
@@ -58,7 +79,7 @@ const ArticleForm = ({
     if (type === "edit") {
       articlesApi
         .editArticle({
-          title: name,
+          title,
           body: content,
           category_id: Number(categoryId),
           article_id: Number(id),
@@ -77,35 +98,35 @@ const ArticleForm = ({
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <fieldset>
         <label htmlFor="title">Title</label>
         <input
+          defaultValue={title}
           id="title"
-          value={name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setTitle(e.target.value)
-          }
+          {...register("title", {
+            required: "Title is required.",
+            maxLength: 225,
+          })}
         />
       </fieldset>
       <fieldset>
         <label htmlFor="content">Content</label>
         <textarea
+          defaultValue={body}
           id="content"
-          value={content}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setContent(e.target.value)
-          }
+          {...register("content", {
+            required: "Content is required.",
+            maxLength: 1000,
+          })}
         />
       </fieldset>
       <fieldset>
         <label htmlFor="category">Category</label>
         <select
           id="category"
-          value={categoryId}
-          onChange={(e: React.ChangeEvent<{ value: string }>) =>
-            setCategoryId(Number(e.target.value))
-          }
+          {...register("categoryId", { required: true })}
+          defaultValue={category_id}
         >
           {categories.map((category, i) => {
             return (
@@ -115,6 +136,14 @@ const ArticleForm = ({
             );
           })}
         </select>
+      </fieldset>
+      <fieldset className={styles.errors}>
+        <p>
+          <ErrorMessage errors={errors} name="title" />
+        </p>
+        <p>
+          <ErrorMessage errors={errors} name="content" />
+        </p>
       </fieldset>
       <BaseButton>{type.toUpperCase()}</BaseButton>
     </form>

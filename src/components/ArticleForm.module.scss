@@ -11,6 +11,12 @@
     flex-direction: row;
     justify-content: space-between;
 
+    &.errors {
+      display: flex;
+      flex-direction: column;
+      color: red;
+      font-size: 14px;
+    }
   }
 
   input, textarea, select {
@@ -19,6 +25,7 @@
     outline: none;
     border: 2px solid gray;
     width: 70%;
+    border-radius: 5px;
   }
 
   textarea {

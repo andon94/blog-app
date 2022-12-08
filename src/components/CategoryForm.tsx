@@ -1,6 +1,8 @@
 import styles from "./ArticleForm.module.scss";
 import BaseButton from "./BaseButton";
-import { useContext, useState } from "react";
+import { useContext } from "react";
+import { useForm } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 import { categoriesApi } from "../services/categories";
 import { AuthContext } from "../context/AuthContextProvider";
 import { CategoryContext } from "../context/CategoryContextProvider";
@@ -24,15 +26,36 @@ const CategoryForm = ({
   const { token } = useContext(AuthContext);
   const { fetchCategories } = useContext(CategoryContext);
   const { setPopup } = useContext(PopupContext);
-  const [title, setTitle] = useState(name);
-  const [content, setContent] = useState(description);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{
+    name: string;
+    description: string;
+    id: number;
+  }>({
+    defaultValues: {
+      name,
+      description,
+      id,
+    },
+  });
+
+  const onSubmit = ({
+    name,
+    description,
+    id,
+  }: {
+    name: string;
+    description: string;
+    id: number;
+  }) => {
     categoriesApi
       .createCategory({
-        name: title,
-        description: content,
+        name,
+        description,
         id: Number(id),
         api_token: token,
       })
@@ -48,26 +71,36 @@ const CategoryForm = ({
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <fieldset>
-        <label htmlFor="title">Title</label>
+        <label htmlFor="name">Title</label>
         <input
-          id="title"
-          value={title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setTitle(e.target.value)
-          }
+          id="name"
+          defaultValue={name}
+          {...register("name", {
+            required: "Name is required",
+            maxLength: 225,
+          })}
         />
       </fieldset>
       <fieldset>
-        <label htmlFor="content">Description</label>
+        <label htmlFor="description">Description</label>
         <input
-          id="content"
-          value={content}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setContent(e.target.value)
-          }
+          id="description"
+          defaultValue={description}
+          {...register("description", {
+            required: "Description is required",
+            maxLength: 512,
+          })}
         />
+      </fieldset>
+      <fieldset className={styles.errors}>
+        <p>
+          <ErrorMessage errors={errors} name="name" />
+        </p>
+        <p>
+          <ErrorMessage errors={errors} name="description" />
+        </p>
       </fieldset>
       <BaseButton>{type.toUpperCase()}</BaseButton>
     </form>
