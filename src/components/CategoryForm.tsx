@@ -52,22 +52,42 @@ const CategoryForm = ({
     description: string;
     id: number;
   }) => {
-    categoriesApi
-      .createCategory({
-        name,
-        description,
-        id: Number(id),
-        api_token: token,
-      })
-      .then((res: Category) => {
-        fetchCategories();
-        setIsOpen(false);
-        setPopup("Category created!");
-      })
-      .catch((err: ErrorInterface) => {
-        setPopup("Error!");
-        console.log(err);
-      });
+    if (type === "create") {
+      categoriesApi
+        .createCategory({
+          name,
+          description,
+          id: Number(id),
+          api_token: token,
+        })
+        .then((res: Category) => {
+          fetchCategories();
+          setIsOpen(false);
+          setPopup("Category created!");
+        })
+        .catch((err: ErrorInterface) => {
+          setPopup("Error!");
+          console.log(err);
+        });
+    }
+    if (type === "edit") {
+      categoriesApi
+        .editCategory({
+          name,
+          description,
+          category_id: Number(id),
+          api_token: token,
+        })
+        .then((_res: Category) => {
+          fetchCategories();
+          setIsOpen(false);
+          setPopup("Category edited!");
+        })
+        .catch((err: ErrorInterface) => {
+          setPopup("Error!");
+          console.log(err);
+        });
+    }
   };
 
   return (
@@ -85,7 +105,7 @@ const CategoryForm = ({
       </fieldset>
       <fieldset>
         <label htmlFor="description">Description</label>
-        <input
+        <textarea
           id="description"
           defaultValue={description}
           {...register("description", {

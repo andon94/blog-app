@@ -22,7 +22,7 @@ class CategoriesAPI {
   editCategory(data: EditCategory) {
     const { category_id, api_token } = data;
     return this.baseFetcher.put(
-      `/articles/${category_id}?api_token=${api_token}`,
+      `/categories/${category_id}?api_token=${api_token}`,
       data
     );
   }
